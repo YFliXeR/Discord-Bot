@@ -14,7 +14,7 @@ intents.message_content = True
 
 client = discord.Client(intents=intents)
 
-# Dictionary to store saved dates and times along with account names
+# Dictionary to store saved dates, times, and account names along with the channel ID where the reminder was added
 saved_reminders = {}
 
 
@@ -48,17 +48,21 @@ async def on_message(message):
     new_datetime_obj = datetime_obj + datetime.timedelta(days=7)
     new_datetime_str = new_datetime_obj.strftime("%d %b, %Y %I:%M%p")
 
-    # Save reminder date and account name to dictionary
+    # Save reminder date, time, account name, and channel ID to dictionary
     if account_name not in saved_reminders:
       saved_reminders[account_name] = [(new_datetime_obj, message.channel.id)]
     else:
       saved_reminders[account_name].append(
-        (new_datetime_obj, message.channel.id))
+        (new_datetime_obj, message.channel.id, message.author.id))
 
     for account_name, dates in saved_reminders.items():
       print(account_name, dates)
 
-    await message.channel.send(f"Saved '{new_datetime_str}:{account_name}'")
+    # Create embed with confirmation message
+    embed = discord.Embed(title="Reminder added", description=f"Account: {account_name}", color=0x00ff00)
+    embed.add_field(name="Date and Time", value=new_datetime_str)
+    # Send confirmation as embed
+    await message.channel.send(embed=embed)
 
   # Check for other commands and handle them here
 
@@ -68,18 +72,21 @@ async def check_saved_dates():
   now = datetime.datetime.now()
   for account_name, dates in saved_reminders.items():
     for date in dates:
-      date_obj, channel_id = date
+      date_obj, channel_id, author_id = date
       if now >= date_obj:
         # Get the channel where the message was sent
         channel = client.get_channel(channel_id)
 
         # Get the member who added the reminder
-        member = await channel.guild.fetch_member(int(channel_id))
+        member = await channel.guild.fetch_member(author_id)
 
         if member is not None:
-          await channel.send(
-            f"{member.mention}, Reminder: {date_obj.strftime('%d %b, %Y %I:%M%p')} for account '{account_name}' is due!"
-          )
+          # Create embed with reminder information
+          embed = discord.Embed(title="Reminder", description=f"Account: {account_name}", color=0x00ff00)
+          embed.add_field(name="Date and Time", value=date_obj.strftime('%d %b, %Y %I:%M%p'))
+          # Send reminder as embed
+          await channel.send(content=member.mention, embed=embed)
+
         # Remove saved date from dictionary
         saved_reminders[account_name].remove(date)
 
