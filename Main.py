@@ -33,15 +33,11 @@ async def on_message(message):
     if message.content.startswith("!add7"):
         # Parse input to get date, time, and account name
         input_str = message.content[7:].strip()  # Remove "!add7 " from beginning
-        try:
-            datetime_str, account_name = input_str.rsplit(":", 1)
-            datetime_obj = datetime.datetime.strptime(datetime_str.strip(),
-                                                      "%d %b, %Y %I:%M%p")
-        except:
-            await message.channel.send(
-                "Invalid input. Please enter date and time in the format '3 Apr, 2023 10:17pm:account_name'."
-            )
-            return
+        
+        datetime_str, account_name = input_str.rsplit(":", 1)
+        datetime_obj = datetime.datetime.strptime(datetime_str.strip(),"%d %b, %Y %I:%M%p")
+        print(datetime_obj)
+      
 
         # Calculate date 7 days after input date and time
         new_datetime_obj = datetime_obj + datetime.timedelta(days=7)
