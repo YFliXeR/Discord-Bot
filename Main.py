@@ -91,4 +91,4 @@ async def check_saved_dates():
           pass
 
 
-client.run(os.getenv("MTA1ODM4NTkyOTY5OTYwNjU1OA.G-BPsa.D4L8wI8HuI2p_O1c-Pqt5vy5q4YdIXsHjc3ClQ"))
+client.run(os.getenv("TOKEN"))
